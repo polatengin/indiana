@@ -10,3 +10,6 @@ if (!fileNameArg) {
   console.log("No file provided.");
   exit(1);
 }
+
+type WorkItem = {title: string, description: string, type: string, children: WorkItem[]};
+
