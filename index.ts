@@ -20,3 +20,5 @@ const orgName = env.AZUREDEVOPS_ORGNAME || "enpolat";
 const projectName = env.AZUREDEVOPS_PROJECTNAME || "monaco";
 
 const authHandler = azdev.getPersonalAccessTokenHandler(token);
+
+const connection = new azdev.WebApi(`https://dev.azure.com/${orgName}`, authHandler);
