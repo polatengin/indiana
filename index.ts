@@ -17,3 +17,5 @@ const token = env.AZUREDEVOPS_PAT || "";
 
 const orgName = env.AZUREDEVOPS_ORGNAME || "enpolat";
 
+const projectName = env.AZUREDEVOPS_PROJECTNAME || "monaco";
+
