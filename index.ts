@@ -104,3 +104,5 @@ const items: WorkItem[] = JSON.parse(jsonContent);
 items.forEach(async (item) => {
   await createWorkItems(item);
 });
+
+getWorkItemsByProject(projectName);
