@@ -53,7 +53,7 @@ async function getWorkItemsByProject(projectName: string) {
   });
 }
 
-async function createWorkItems(item: WorkItem, parentId: string = "") {
+async function createWorkItem(item: WorkItem, parentId: string = "") {
   const witApi = await getWorkItemTrackingApi();
 
   const workItem: { op: string, path: string, value: string | object }[] = [
@@ -90,7 +90,7 @@ async function createWorkItems(item: WorkItem, parentId: string = "") {
 
   if (item.children && item.children.length > 0) {
     item.children.forEach(async (child) => {
-      await createWorkItems(child, parent_id);
+      await createWorkItem(child, parent_id);
     }
   )};
 
@@ -102,7 +102,7 @@ const jsonContent = readFileSync(fileNameArg, "utf8");
 const items: WorkItem[] = JSON.parse(jsonContent);
 
 items.forEach(async (item) => {
-  await createWorkItems(item);
+  await createWorkItem(item);
 });
 
 getWorkItemsByProject(projectName);
