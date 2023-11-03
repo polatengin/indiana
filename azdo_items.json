@@ -1,0 +1,60 @@
+[
+  {
+    "title": "Sample epic",
+    "description": "Description of the epic",
+    "type": "Epic",
+    "children": [
+      {
+        "title": "Sample feature 1",
+        "description": "Description of the feature 1",
+        "type": "Feature",
+        "children": [
+          {
+            "title": "Sample user story 1",
+            "description": "Description of the user story 1",
+            "type": "User Story",
+            "children": [
+              {
+                "title": "Sample task 1",
+                "description": "Description of the task 1",
+                "type": "Task",
+                "children": []
+              },
+              {
+                "title": "Sample task 2",
+                "description": "Description of the task 2",
+                "type": "Task",
+                "children": []
+              }
+            ]
+          },
+          {
+            "title": "Sample user story 2",
+            "description": "Description of the user story 2",
+            "type": "User Story",
+            "children": []
+          }
+        ]
+      },
+      {
+        "title": "Sample feature 2",
+        "description": "Dewscription of the feature 2",
+        "type": "Feature",
+        "children": [
+          {
+            "title": "Sample user story 3",
+            "description": "Description of the user story 3",
+            "type": "User Story",
+            "children": []
+          },
+          {
+            "title": "Sample user story 4",
+            "description": "Description of the user story 4",
+            "type": "User Story",
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+]
