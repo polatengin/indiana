@@ -100,3 +100,7 @@ async function createWorkItems(item: WorkItem, parentId: string = "") {
 const jsonContent = readFileSync(fileNameArg, "utf8");
 
 const items: WorkItem[] = JSON.parse(jsonContent);
+
+items.forEach(async (item) => {
+  await createWorkItems(item);
+});
