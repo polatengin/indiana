@@ -96,3 +96,5 @@ async function createWorkItems(item: WorkItem, parentId: string = "") {
 
   return result;
 }
+
+const jsonContent = readFileSync(fileNameArg, "utf8");
