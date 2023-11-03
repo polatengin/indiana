@@ -52,3 +52,47 @@ async function getWorkItemsByProject(projectName: string) {
     }
   });
 }
+
+async function createWorkItems(item: WorkItem, parentId: string = "") {
+  const witApi = await getWorkItemTrackingApi();
+
+  const workItem: { op: string, path: string, value: string | object }[] = [
+    {
+      op: "add",
+      path: "/fields/System.Title",
+      value: item.title,
+    },
+    {
+      op: "add",
+      path: "/fields/System.Description",
+      value: item.description,
+    },
+  ];
+
+  
+  if (parentId !== "") {
+    workItem.push({
+      op: "add",
+      path: "/relations/-",
+      value: {
+        rel: "System.LinkTypes.Hierarchy-Reverse",
+        url: `https://dev.azure.com/${orgName}/${projectName}/_apis/wit/workItems/${parentId}`,
+        attributes: {
+          comment: item.description,
+        },
+      },
+    });
+  }
+
+  const result = await witApi.createWorkItem(null, workItem, projectName, item.type);
+
+  const parent_id = result.id?.toString();
+
+  if (item.children && item.children.length > 0) {
+    item.children.forEach(async (child) => {
+      await createWorkItems(child, parent_id);
+    }
+  )};
+
+  return result;
+}
