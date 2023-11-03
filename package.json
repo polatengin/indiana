@@ -6,6 +6,9 @@
   "keywords": [],
   "author": "",
   "license": "MIT",
+  "dependencies": {
+    "azure-devops-node-api": "12.1.0"
+  },
   "devDependencies": {
     "@types/node": "20.8.10",
     "ts-node": "10.9.1",
