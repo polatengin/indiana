@@ -32,7 +32,7 @@ async function getWorkItemsByProject(projectName: string) {
 
   const queryResult = await witApi.queryByWiql({ query: `SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.TeamProject] = '${projectName}' AND [System.Id] > 0 ORDER BY [System.Id]` });
 
-  if (!queryResult || !queryResult.workItems) {
+  if (!queryResult?.workItems) {
     console.log("No work items found.");
     return;
   }
