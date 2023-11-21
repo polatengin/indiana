@@ -67,7 +67,14 @@ async function createWorkItem(item: WorkItem, parentId: string = "") {
     },
   ];
 
-  
+  if (item.acceptanceCriteria) {
+    workItem.push({
+      op: "add",
+      path: "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
+      value: item.acceptanceCriteria,
+    });
+  }
+
   if (parentId !== "") {
     workItem.push({
       op: "add",
