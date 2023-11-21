@@ -47,9 +47,7 @@ async function getWorkItemsByProject(projectName: string) {
   const workItems = await witApi.getWorkItems(workItemIds as number[]);
 
   workItems.forEach((workItem) => {
-    if (workItem && workItem.fields) {
-      console.log(`Work Item ID: ${workItem.id}, Title: ${workItem.fields['System.Title']}`);
-    }
+    console.log(`Work Item ID: ${workItem?.id}, Title: ${workItem?.fields?.['System.Title']}`);
   });
 }
 
