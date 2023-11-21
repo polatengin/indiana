@@ -11,7 +11,7 @@ if (!fileNameArg) {
   exit(1);
 }
 
-type WorkItem = {title: string, description: string, type: string, children: WorkItem[]};
+type WorkItem = {title: string, description: string, type: string, acceptanceCriteria: string, children: WorkItem[]};
 
 const token = env.AZUREDEVOPS_PAT ?? "";
 
