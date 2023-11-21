@@ -95,12 +95,18 @@ async function createWorkItem(item: WorkItem, parentId: string = "") {
   return result;
 }
 
-const jsonContent = readFileSync(fileNameArg, "utf8");
+async function main() {
+  const jsonContent = readFileSync(fileNameArg, "utf8");
 
-const items: WorkItem[] = JSON.parse(jsonContent);
+  const items: WorkItem[] = JSON.parse(jsonContent);
 
-items.forEach(async (item) => {
-  await createWorkItem(item);
-});
+  for (const item of items) {
+    await createWorkItem(item);
+  }
 
-getWorkItemsByProject(projectName);
+  // await getWorkItemsByProject(projectName);
+}
+
+(async () => {
+  await main();
+})();
