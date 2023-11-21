@@ -1,57 +1,248 @@
 [
   {
-    "title": "Sample epic",
-    "description": "Description of the epic",
+    "title": "Observability",
+    "description": "Observability is the ability to understand the internal state of a system by looking at its outputs. It is a superset of monitoring, alerting, and logging.",
     "type": "Epic",
     "children": [
       {
-        "title": "Sample feature 1",
-        "description": "Description of the feature 1",
+        "title": "Plan observability approach",
+        "description": "Observability related tooling should be selected and business critical indicators identified",
         "type": "Feature",
         "children": [
           {
-            "title": "Sample user story 1",
-            "description": "Description of the user story 1",
+            "title": "Select centralized monitoring solution (assumes Azure Monitor)",
+            "description": "As a project lead, I want to make a decision on which centralized monitoring solution to use, so that telemetry data can be aggregated and analyzed",
             "type": "User Story",
-            "children": [
-              {
-                "title": "Sample task 1",
-                "description": "Description of the task 1",
-                "type": "Task",
-                "children": []
-              },
-              {
-                "title": "Sample task 2",
-                "description": "Description of the task 2",
-                "type": "Task",
-                "children": []
-              }
-            ]
+            "acceptanceCriteria": "[ ] Centralized monitoring solution selected"
           },
           {
-            "title": "Sample user story 2",
-            "description": "Description of the user story 2",
+            "title": "Select instrumentation tooling (assumes OpenTelemetry exporter for Azure Monitor)",
+            "description": "As a project lead, I want to make a decision on what tooling to use to instrument telemetry data, so that telemetry data can be collected and sent to the centralized monitoring solution",
             "type": "User Story",
-            "children": []
+            "acceptanceCriteria": "[ ] Instrumentation library selected"
+          },
+          {
+            "title": "Identify critical business signals",
+            "description": "As a project lead, I want to identify the resources and signals most important to the business and application, so that the team can begin collecting and analyzing the requisite data",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Design doc created that outlines telemetry signals to prioritize for the application<br /><br />[ ] Document references resource-specific and application-specific telemetry signals<br /><br />[ ] Monitor reference docs linked for each infrastructure resource (e.g. https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus-reference)"
           }
         ]
       },
       {
-        "title": "Sample feature 2",
-        "description": "Dewscription of the feature 2",
+        "title": "Create infrastructure",
+        "description": "All supporting observability infrastructure should be created using infrastructure-as-code",
         "type": "Feature",
         "children": [
           {
-            "title": "Sample user story 3",
-            "description": "Description of the user story 3",
+            "title": "Create Log Analytics Workspace resource",
+            "description": "As a project developer, I want a Log Analytics Workspace defined in IaC, so that we can send telemetry data for analysis",
             "type": "User Story",
-            "children": []
+            "acceptanceCriteria": "[ ] Log Analytics Workspace defined in IaC"
           },
           {
-            "title": "Sample user story 4",
-            "description": "Description of the user story 4",
+            "title": "Create Application Insights resource",
+            "description": "As a project developer, I want an Application Insights instance defined in IaC, so that we can send telemetry data for analysis",
             "type": "User Story",
-            "children": []
+            "acceptanceCriteria": "[ ] Application Insights defined in IaC"
+          },
+          {
+            "title": "Ensure all supporting Azure resources send telemetry data to Log Analytics",
+            "description": "As a project developer, I want all Azure resources to send diagnostic information to the Log Analytics Workspace, so that we can begin analyzing collected telemetry data for those resources",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Diagnostic settings added for all Azure resources in IaC<br /><br />[ ] Diagnostic settings reference Log Analytics Workspace"
+          },
+          {
+            "title": "View and query resource metrics in Log Analytics",
+            "description": "As a project developer, I want a set of basic KQL queries that utilize Log Analytics tables saved to the repository, so that the team can begin familiarizing with querying Log Analytics using KQL",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Documentation added that outlines where to retrieve resource logs and metrics<br /><br />[ ] At least 1 metric's retrieval process documented<br /><br />[ ] At least 3 KQL queries that use resource-specific Log Analytics Workspace tables documented (https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/tables-resourcetype)"
+          }
+        ]
+      },
+      {
+        "title": "Auto instrument telemetry data",
+        "description": "Instrumentation tooling should be added to the project to begin automatically instrumenting out-of-the-box logs, metrics, and traces",
+        "type": "Feature",
+        "children": [
+          {
+            "title": "Add auto instrumentation code to project",
+            "description": "As a project developer, I want the language-specific OpenTelemetry Exporter for Azure Monitor to be added to the project, so that application-specific telemetry is collected",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Language-specific OpenTelemetry Exporter package installed (e.g. https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore)<br /><br />[ ] Application code modified according to OpenTelemetry Exporter documentation"
+          },
+          {
+            "title": "Reference Application Insights Instrumentation Key in project",
+            "description": "As a project developer, I want the Application Insights Instrumentation Key to be automatically written to the project environment variables, so that telemetry data is sent to the Application Insights instance deployed via IaC",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Example environment variables file added to the project<br /><br />[ ] Environment variables file sets the Application Insights Instrumentation Key using the variable name specified by the OpenTelemetryExporter documentation<br /><br />[ ] Application Insights Instrumentation Key output from IaC as a sensitive value<br /><br />[ ] Application Insights Instrumentation Key output value automatically written to environment variables used by published versions of the project"
+          },
+          {
+            "title": "View and query logs, metrics, and traces in Application Insights",
+            "description": "As a project developer, I want a set of basic KQL queries that utilize Application Insights tables saved to the repository, so that the team can begin familiarizing with querying Application Insights using KQL",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Documentation added that outlines how to retrieve application logs and metrics<br /><br />[ ] At least 1 metric's retrieval process documented<br /><br />[ ] At least 3 KQL queries that use resource-specific Application Insights tables documented (https://learn.microsoft.com/en-us/azure/azure-monitor/app/data-model-complete)"
+          }
+        ]
+      },
+      {
+        "title": "Add basic manual instrumentation",
+        "description": "Manually instrumented telemetry data should augment auto-instrumented data to enable base visibility",
+        "type": "Feature",
+        "children": [
+          {
+            "title": "Add log statements to project and configure log level",
+            "description": "As a project developer, I want an application wide log level configured, and I want each existing log statement to have an appropriate level applied, so that application-wide log output becomes configurable",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Explanatory log statements added to project code, where missing<br /><br />[ ] Appropriate log level applied to all log statements<br /><br />[ ] Application wide log level configured (e.g. https://learn.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-7.0#configure-logging)"
+          },
+          {
+            "title": "Ensure all dependencies are tracked",
+            "description": "As a project developer, I want all currently untracked dependencies captured with spans, so that all sub-operations within the larger project operations are collected by Azure Monitor",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Requests and dependencies available in Application Insights compared with expected set of requests and dependencies for the application (many libraries will auto instrument spans for their requests and dependencies)<br /><br />[ ] Tracers and spans added to project code that wrap all missing requests and dependencies"
+          },
+          {
+            "title": "Implement distributed tracing across service boundaries",
+            "description": "As a project developer, I want distributed tracing configured across service boundaries, so that entire operations can be analyzed in Azure Monitor queries",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Appropriate trace and span IDs passed from service to service using W3C Trace Context (https://www.w3.org/TR/trace-context/)<br /><br />[ ] Application Insights Transaction Search displays entire end to end operation"
+          },
+          {
+            "title": "Implement health checks",
+            "description": "As a project developer, I want each service to expose a consumable health check, so that automated processes can access the check and report service health",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Health checks implemented on all services according to the type of service (http, background, etc.)<br /><br />[ ] Health check logs are queryable in Azure Monitor"
+          }
+        ]
+      },
+      {
+        "title": "Build visualization dashboards",
+        "description": "Dashboards should provide visual representations of instrumented telemetry data",
+        "type": "Feature",
+        "children": [
+          {
+            "title": "Design tile layout",
+            "description": "As a project developer, I want to predefine the set of tiles that should be displayed visually, so that project developers can build the necessary supporting queries",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Design doc created that outlines the list of telemetry signals that should be displayed in a dashboard<br /><br />[ ] Dashboard layout documented"
+          },
+          {
+            "title": "Build supporting queries",
+            "description": "As a project developer, I want the set of KQL queries that support the pre-defined visualization tiles added to the project, so that the queries can be added to dashboard related IaC",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Set of KQL queries that retrieve the specified log-based telemetry signals added to the existing dashboard design doc<br /><br />[ ] Metrics that are necessary to support dashboard tiles added to the document"
+          },
+          {
+            "title": "Create Azure Workbooks resource",
+            "description": "As a project developer, I want an Azure Workbook defined in IaC that includes the set of pre-built supporting queries, so that the visualization dashboard is deployed alongside existing project infrastructure",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Azure Workbooks defined in IaC that implements the dashboard outlined in the design doc using the defined KQL queries and metrics"
+          }
+        ]
+      },
+      {
+        "title": "Build automated alerts",
+        "description": "Alerts should provide automatic notifications based on thresholds applied to incoming telemetry data",
+        "type": "Feature",
+        "children": [
+          {
+            "title": "Design alert signals and thresholds",
+            "description": "As a project developer, I want to predefine the set of telemetry signals and corresponding  thresholds that should trigger action, so that project developers can build the necessary supporting queries and IaC",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Design doc created that outlines the list of telemetry signals that should be used in alerts, with associated thresholds, etc<br /><br />[ ] Document references recommended alert rules for all supporting resources (e.g. https://learn.microsoft.com/en-us/azure/azure-monitor/vm/tutorial-monitor-vm-alert-recommended)"
+          },
+          {
+            "title": "Create Azure Alert action group",
+            "description": "As a project developer, I want an Azure Alert action group with at least one email notification added to the project IaC, so that project admins can receive alert notifications",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Azure Alert action group defined in IaC"
+          },
+          {
+            "title": "Create Azure Alert rules",
+            "description": "As a project developer, I want the set of pre-defined signals and thresholds added as Azure Alert rules to the project IaC, so that project admins receive alert notifications when certain thresholds are met",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Azure Alert rules defined in IaC that implement the rules outlined in the design doc using the defined KQL queries and metrics<br /><br />[ ] All alert rules utilize the action group"
+          }
+        ]
+      },
+      {
+        "title": "Implement advanced instrumentation practices",
+        "description": "Additional telemetry data should be instrumented to support business-specific visualization tiles and alerts",
+        "type": "Feature",
+        "children": [
+          {
+            "title": "Design additional required business-specific metrics",
+            "description": "As a project developer, I want to define the set of business-specific metrics that should be collected in addition to the out-of-the-box metrics, so that these new custom metrics can be implemented in code",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Design doc created that lists additional required metrics that are not instrumented by the application"
+          },
+          {
+            "title": "Design additional dimensions that should be added to existing logs",
+            "description": "As a project developer, I want to define the business-specific dimensions that should be added to existing logs and traces, so that these attributes can be retrieved in KQL queries and support additional visualization tiles and alert rules",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Design doc created that lists additional required attributes/dimensions that are not available in the instrumented telemetry data"
+          },
+          {
+            "title": "Instrument new custom metrics",
+            "description": "As a project developer, I want to instrument the additional business-specific custom metrics, so that these metrics can be captured in visualization tiles and alert rules",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Custom metrics added to application code to enable tracking of documented additional required metrics"
+          },
+          {
+            "title": "Add custom dimensions to instrumented telemetry data",
+            "description": "As a project developer, I want to instrument the additional business-specific custom dimensions, so that these new attributes can be captured in visualization tiles and alert rules",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Custom dimensions added to application code to enable tracking of documented additional required attributes/dimensions"
+          },
+          {
+            "title": "Track custom metrics in Azure Workbooks and Azure Alerts",
+            "description": "As a project developer, I want to utilize the custom metrics in Workbook tiles and Azure Alert rules, so that they can be visualized and trigger notifications when appropriate thresholds are hit",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Tiles added to Azure Workbook IaC that consume the custom metrics<br /><br />[ ] Azure alert rules added to IaC that consume the custom metrics"
+          },
+          {
+            "title": "Track custom dimensions in Azure Workbooks and Azure Alerts",
+            "description": "As a project developer, I want to utilize the custom dimensions in Workbook tiles and Azure Alert rules, so that they can be visualized and trigger notifications when appropriate thresholds are hit",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Tiles added to Azure Workbook IaC that consume the custom dimensions<br /><br />[ ] Azure alert rules added to IaC that consume the custom dimensions"
+          }
+        ]
+      },
+      {
+        "title": "Accommodate cost and scale",
+        "description": "Cost and capacity concerns should be mitigated",
+        "type": "Feature",
+        "children": [
+          {
+            "title": "Design cost and scaleability measures",
+            "description": "As a project developer, I want clear specifications for cost and scalability measures, so that expenses related to the collection and storage of telemetry data are minimized",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Design doc created that defines the sampling percentage that should be used<br /><br />[ ] Log retention timeframe documented<br /><br />[ ] Log levels documented for all environments<br /><br />[ ] Processes that require log rotation identified and the rotation process documented"
+          },
+          {
+            "title": "Set sampling percentage",
+            "description": "As a project developer, I want sampling percentages set, so that a percentage of telemetry data is sampled out, reducing costs",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Sampling percentage configured for the application"
+          },
+          {
+            "title": "Set retention policies for stored telemetry data",
+            "description": "As a project developer, I want retention policies set for Log Analytics and Application Insights, so that data is archived after some time, reducing costs",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Log retention policy configured for Log Analytics and Application Insights in IaC"
+          },
+          {
+            "title": "Ensure appropriate log levels are set across environments",
+            "description": "As a project developer, I want log levels applied across all deployment environments, so that low level logs are suppressed by default, reducing costs",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Log level is set via environment variable<br /><br />[ ] Log level configured for all deployed environments<br /><br />[ ] Log level can be updated without re-building and re-deploying the application"
+          },
+          {
+            "title": "Set log rotation policies",
+            "description": "As a project developer, I want log rotation policies applied where applicable, so that performance is unaffected while ensuring log data is properly migrated to Azure Monitor",
+            "type": "User Story",
+            "acceptanceCriteria": "[ ] Log rotation processes implemented, where necessary"
           }
         ]
       }
