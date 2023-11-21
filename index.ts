@@ -13,11 +13,11 @@ if (!fileNameArg) {
 
 type WorkItem = {title: string, description: string, type: string, children: WorkItem[]};
 
-const token = env.AZUREDEVOPS_PAT || "";
+const token = env.AZUREDEVOPS_PAT ?? "";
 
-const orgName = env.AZUREDEVOPS_ORGNAME || "enpolat";
+const orgName = env.AZUREDEVOPS_ORGNAME ?? "enpolat";
 
-const projectName = env.AZUREDEVOPS_PROJECTNAME || "monaco";
+const projectName = env.AZUREDEVOPS_PROJECTNAME ?? "monaco";
 
 const authHandler = azdev.getPersonalAccessTokenHandler(token);
 
