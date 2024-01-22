@@ -15,6 +15,11 @@ type WorkItem = {title: string, description: string, type: string, acceptanceCri
 
 const token = env.AZUREDEVOPS_PAT ?? "";
 
+if (!token) {
+  console.log("No token provided.");
+  exit(1);
+}
+
 const orgName = env.AZUREDEVOPS_ORGNAME ?? "enpolat";
 
 const projectName = env.AZUREDEVOPS_PROJECTNAME ?? "monaco";
