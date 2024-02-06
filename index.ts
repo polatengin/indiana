@@ -3,6 +3,8 @@ import { readFileSync } from "fs";
 import { env, exit } from "process";
 
 import * as azdev from "azure-devops-node-api";
+import { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
+
 const program = new Command();
 
 program
