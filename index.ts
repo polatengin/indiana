@@ -49,48 +49,10 @@ if (!config.file) {
 
 type WorkItem = {title: string, description: string, type: string, acceptanceCriteria: string, children: WorkItem[]};
 
-const token = env.AZUREDEVOPS_PAT ?? "";
-
-if (!token) {
-  console.log("No token provided.");
-  exit(1);
-}
-
-const orgName = env.AZUREDEVOPS_ORGNAME ?? "enpolat";
-
-const projectName = env.AZUREDEVOPS_PROJECTNAME ?? "monaco";
-
-const authHandler = azdev.getPersonalAccessTokenHandler(token);
-
-const connection = new azdev.WebApi(`https://dev.azure.com/${orgName}`, authHandler);
-
-async function getWorkItemTrackingApi() {
-  return await connection.getWorkItemTrackingApi();
-}
-
-async function getWorkItemsByProject(projectName: string) {
-  const witApi = await getWorkItemTrackingApi();
-
-  const queryResult = await witApi.queryByWiql({ query: `SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.TeamProject] = '${projectName}' AND [System.Id] > 0 ORDER BY [System.Id]` });
-
-  if (!queryResult?.workItems) {
-    console.log("No work items found.");
-    return;
-  }
-
-  const workItemIds = queryResult.workItems.map((item) => item.id).filter((id) => id !== undefined);
-
-  if (workItemIds.length === 0) {
-    console.log("No work items found.");
-    return;
-  }
-
-  const workItems = await witApi.getWorkItems(workItemIds as number[]);
-
-  workItems.forEach((workItem) => {
-    console.log(`Work Item ID: ${workItem?.id}, Title: ${workItem?.fields?.['System.Title']}`);
-  });
-}
+interface IOrchestrator {
+  getWorkItemsByProject(projectName: string): Promise<void>;
+  createWorkItem(item: WorkItem, parentId?: string): Promise<void>;
+};
 
 async function createWorkItem(item: WorkItem, parentId: string = "") {
   const witApi = await getWorkItemTrackingApi();
