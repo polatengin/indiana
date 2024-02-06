@@ -137,15 +137,12 @@ class AzDo implements IOrchestrator {
   }
 };
 
-  const items: WorkItem[] = JSON.parse(jsonContent);
-
-  for (const item of items) {
-    await createWorkItem(item);
+class GitHub implements IOrchestrator {
+  public async getWorkItemsByProject(projectName: string) {
+    console.log("GitHub: getWorkItemsByProject");
   }
 
-  // await getWorkItemsByProject(projectName);
+  public async createWorkItem(item: WorkItem, parentId: string = "") {
+    console.log("GitHub: createWorkItem");
+  }
 }
-
-(async () => {
-  await main();
-})();
