@@ -146,3 +146,13 @@ class GitHub implements IOrchestrator {
     console.log("GitHub: createWorkItem");
   }
 }
+
+const jsonContent = readFileSync(config.file, "utf8");
+
+const items: WorkItem[] = JSON.parse(jsonContent);
+
+const orchestrator: IOrchestrator = config.orchestrator === "azdo" ? new AzDo() : new GitHub();
+
+for (const item of items) {
+  orchestrator.createWorkItem(item).then(() => {});
+}
