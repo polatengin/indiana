@@ -1,12 +1,46 @@
-import { argv, env, exit } from "process";
+import { Command } from "commander";
 import { readFileSync } from "fs";
+import { env, exit } from "process";
 
 import * as azdev from "azure-devops-node-api";
+const program = new Command();
 
-const args = argv.slice(2);
-const fileNameArg = args[0];
+program
+  .option('--token <string>', 'PAT Token')
+  .option('--orchestrator <string>', 'azdo, github')
+  .option('--organization <string>', 'Name of the Organization')
+  .option('--project <string>', 'Name of the Project')
+  .option('--file <string>', 'Json file containing the work items to be created.')
+  .parse(process.argv);
 
-if (!fileNameArg) {
+const config = {
+  ...{
+    token: env.INDIANA_TOKEN ?? "",
+    orchestrator: env.INDIANA_ORCHESTRATOR ?? "",
+    organization: env.INDIANA_ORGANIZATION ?? "",
+    project: env.INDIANA_PROJECT ?? "",
+    file: env.INDIANA_FILE ?? ""
+  },
+  ...program.opts()
+};
+
+if (!config.token) {
+  console.log("No token provided.");
+  exit(1);
+}
+if (!config.orchestrator) {
+  console.log("No orchestrator provided.");
+  exit(1);
+}
+if (!config.organization) {
+  console.log("No organization provided.");
+  exit(1);
+}
+if (!config.project) {
+  console.log("No project provided.");
+  exit(1);
+}
+if (!config.file) {
   console.log("No file provided.");
   exit(1);
 }
