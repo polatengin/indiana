@@ -6,6 +6,8 @@ import { Command } from "commander";
 import * as azdev from "azure-devops-node-api";
 import { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
 
+import { Octokit } from "@octokit/core";
+
 const program = new Command();
 
 program
@@ -139,12 +141,20 @@ class AzDo implements IOrchestrator {
 };
 
 class GitHub implements IOrchestrator {
+  private octokit: Octokit;
+
+  public constructor() {
+    this.octokit = new Octokit({
+      auth: config.token
+    })
+  }
+
   public async getWorkItemsByProject(projectName: string) {
     console.log("GitHub: getWorkItemsByProject");
   }
 
   public async createWorkItem(item: WorkItem, parentId: string = "") {
-    console.log("GitHub: createWorkItem");
+    
   }
 }
 
