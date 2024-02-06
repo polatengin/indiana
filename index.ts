@@ -54,59 +54,88 @@ interface IOrchestrator {
   createWorkItem(item: WorkItem, parentId?: string): Promise<void>;
 };
 
-async function createWorkItem(item: WorkItem, parentId: string = "") {
-  const witApi = await getWorkItemTrackingApi();
+class AzDo implements IOrchestrator {
+  private connection: azdev.WebApi;
+  private authHandler: IRequestHandler;
 
-  const workItem: { op: string, path: string, value: string | object }[] = [
-    {
-      op: "add",
-      path: "/fields/System.Title",
-      value: item.title,
-    },
-    {
-      op: "add",
-      path: "/fields/System.Description",
-      value: item.description,
-    },
-  ];
-
-  if (item.acceptanceCriteria) {
-    workItem.push({
-      op: "add",
-      path: "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
-      value: item.acceptanceCriteria,
-    });
+  public constructor() {
+    this.authHandler = azdev.getPersonalAccessTokenHandler(config.token);
+    this.connection = new azdev.WebApi(`https://dev.azure.com/${config.organization}`, this.authHandler);
   }
 
-  if (parentId !== "") {
-    workItem.push({
-      op: "add",
-      path: "/relations/-",
-      value: {
-        rel: "System.LinkTypes.Hierarchy-Reverse",
-        url: `https://dev.azure.com/${orgName}/${projectName}/_apis/wit/workItems/${parentId}`,
-        attributes: {
-          comment: item.description,
-        },
-      },
-    });
-  }
-
-  const result = await witApi.createWorkItem(null, workItem, projectName, item.type);
-
-  const parent_id = result.id?.toString();
-
-  if (item.children && item.children.length > 0) {
-    item.children.forEach(async (child) => {
-      await createWorkItem(child, parent_id);
+  public async getWorkItemsByProject(projectName: string) {
+    const witApi = await this.connection.getWorkItemTrackingApi();
+  
+    const queryResult = await witApi.queryByWiql({ query: `SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.TeamProject] = '${projectName}' AND [System.Id] > 0 ORDER BY [System.Id]` });
+  
+    if (!queryResult?.workItems) {
+      console.log("No work items found.");
+      return;
     }
-  )};
+  
+    const workItemIds = queryResult.workItems.map((item) => item.id).filter((id) => id !== undefined);
+  
+    if (workItemIds.length === 0) {
+      console.log("No work items found.");
+      return;
+    }
+  
+    const workItems = await witApi.getWorkItems(workItemIds as number[]);
+  
+    workItems.forEach((workItem) => {
+      console.log(`Work Item ID: ${workItem?.id}, Title: ${workItem?.fields?.['System.Title']}`);
+    });
+  }
 
-  return result;
-}
+  public async createWorkItem(item: WorkItem, parentId: string = "") {
+    const witApi = await this.connection.getWorkItemTrackingApi();
+  
+    const workItem: { op: string, path: string, value: string | object }[] = [
+      {
+        op: "add",
+        path: "/fields/System.Title",
+        value: item.title,
+      },
+      {
+        op: "add",
+        path: "/fields/System.Description",
+        value: item.description,
+      },
+    ];
+  
+    if (item.acceptanceCriteria) {
+      workItem.push({
+        op: "add",
+        path: "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
+        value: item.acceptanceCriteria,
+      });
+    }
+  
+    if (parentId !== "") {
+      workItem.push({
+        op: "add",
+        path: "/relations/-",
+        value: {
+          rel: "System.LinkTypes.Hierarchy-Reverse",
+          url: `https://dev.azure.com/${config.organization}/${config.project}/_apis/wit/workItems/${parentId}`,
+          attributes: {
+            comment: item.description,
+          },
+        },
+      });
+    }
 
-async function main() {
-  const jsonContent = readFileSync(fileNameArg, "utf8");
+    const result = await witApi.createWorkItem(null, workItem, config.project, item.type);
+
+    const parent_id = result.id?.toString();
+
+    if (item.children && item.children.length > 0) {
+      item.children.forEach(async (child) => {
+        await this.createWorkItem(child, parent_id);
+      }
+    )};
+  }
+};
 
   const items: WorkItem[] = JSON.parse(jsonContent);
 
