@@ -10,11 +10,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "azure-devops-node-api": "12.1.0"
+    "azure-devops-node-api": "12.4.0"
   },
   "devDependencies": {
-    "@types/node": "20.8.10",
-    "ts-node": "10.9.1",
-    "typescript": "5.2.2"
+    "@types/node": "20.11.16",
+    "ts-node": "10.9.2",
+    "typescript": "5.3.3"
   }
 }
