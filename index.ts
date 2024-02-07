@@ -234,6 +234,8 @@ class GitHub implements IOrchestrator {
         }
       })).data;
     }
+
+    this.createLabels(item);
   }
 }
 
