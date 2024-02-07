@@ -259,7 +259,7 @@ class GitHub implements IOrchestrator {
           owner: config.organization,
           repo: config.project,
           title: grandchild.title,
-          body: grandchild.description,
+          body: `${grandchild.description}\n\n${grandchild.acceptanceCriteria}`,
           labels: [
             this.sanitizeTitle(child.title),
           ],
