@@ -236,6 +236,23 @@ class GitHub implements IOrchestrator {
     }
 
     this.createLabels(item);
+
+    item.children.forEach(async (child) => {
+      const child_issue = await this.octokit.request('POST /repos/{owner}/{repo}/issues', {
+        owner: config.organization,
+        repo: config.project,
+        title: child.title,
+        body: child.description,
+        labels: [
+          this.sanitizeTitle(item.title),
+        ],
+        milestone: observability_milestone?.number,
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      });
+
+      console.log(`✔ Created issue #${child_issue.data.number} (${child_issue.data.title}).`);
   }
 }
 
