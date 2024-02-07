@@ -222,7 +222,7 @@ class GitHub implements IOrchestrator {
       headers: {
         'X-GitHub-Api-Version': '2022-11-28'
       }
-    })).data.find((milestone) => milestone.title === item.title);
+    })).data.find((milestone) => milestone.title === this.sanitizeTitle(item.title));
 
     if (!observability_milestone) {
       observability_milestone = (await this.octokit.request('POST /repos/{owner}/{repo}/milestones', {
