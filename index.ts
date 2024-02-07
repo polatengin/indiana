@@ -7,6 +7,7 @@ import * as azdev from "azure-devops-node-api";
 import { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
 
 import { Octokit } from "@octokit/core";
+import { throttling } from "@octokit/plugin-throttling";
 
 const program = new Command();
 
@@ -144,9 +145,32 @@ class GitHub implements IOrchestrator {
   private octokit: Octokit;
 
   public constructor() {
-    this.octokit = new Octokit({
-      auth: config.token
-    })
+    const ThrottlingOctokit = Octokit.plugin(throttling);
+
+    this.octokit = new ThrottlingOctokit({
+      auth: config.token,
+      throttle: {
+        onRateLimit: (retryAfter, options, octokit, retryCount) => {
+          octokit.log.warn(
+            `Request quota exhausted for request ${options.method} ${options.url}`,
+          );
+
+          if (retryCount < 1) {
+            octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+            return true;
+          }
+        },
+        onSecondaryRateLimit: (retryAfter, options, octokit, retryCount) => {
+          octokit.log.warn(
+            `SecondaryRateLimit detected for request ${options.method} ${options.url}`,
+          );
+          if (retryCount < 1) {
+            octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+          }
+          return true;
+        },
+      }
+    });
   }
 
   public async getWorkItemsByProject(projectName: string) {
