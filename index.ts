@@ -177,6 +177,10 @@ class GitHub implements IOrchestrator {
     return title.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
   }
 
+  private generateColor() {
+    return Math.floor(Math.random() * 16777216).toString(16);
+  }
+
   public async getWorkItemsByProject(projectName: string) {
     console.log("GitHub: getWorkItemsByProject");
   }
