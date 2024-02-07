@@ -271,6 +271,19 @@ class GitHub implements IOrchestrator {
 
         console.log(`✔ Created issue #${grandchild_issue.data.number} (${grandchild_issue.data.title}).`);
 
+        await this.octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/comments', {
+          owner: config.organization,
+          repo: config.project,
+          issue_number: grandchild_issue.data.number,
+          body: `Mentioned in #${child_issue.data.number}`,
+          headers: {
+            'X-GitHub-Api-Version': '2022-11-28'
+          }
+        });
+
+        console.log(`✔ Commented on issue #${grandchild_issue.data.number}.`);
+      });
+    });
   }
 }
 
