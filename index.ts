@@ -291,6 +291,14 @@ const jsonContent = readFileSync(config.file, "utf8");
 
 const items: WorkItem[] = JSON.parse(jsonContent);
 
+items.forEach(item => {
+  item.children.forEach(child => {
+    child.children.forEach(grandchild => {
+      grandchild.acceptanceCriteria = grandchild.acceptanceCriteria.replaceAll("<br /><br />", "\n").replaceAll("[ ]", "* [ ]");
+    });
+  });
+});
+
 const orchestrator: IOrchestrator = config.orchestrator === "azdo" ? new AzDo() : new GitHub();
 
 for (const item of items) {
