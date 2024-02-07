@@ -181,6 +181,36 @@ class GitHub implements IOrchestrator {
     return Math.floor(Math.random() * 16777216).toString(16);
   }
 
+  private async createLabels(item: WorkItem) {
+    const existing_labels = (await this.octokit.request('GET /repos/{owner}/{repo}/labels', {
+      owner: config.organization,
+      repo: config.project,
+      headers: {
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    })).data.map((item) => item.name);
+
+    const desired_labels = [
+      { title: this.sanitizeTitle(item.title), description: item.title, color: this.generateColor()},
+      ...item.children.map((child) => ({ title: this.sanitizeTitle(child.title), description: child.title, color: this.generateColor() })),
+    ];
+
+    const diff = desired_labels.filter(item => existing_labels.indexOf(item.title) < 0);
+
+    diff.forEach(async (label) => {
+      await this.octokit.request("POST /repos/{owner}/{repo}/labels", {
+        owner: config.organization,
+        repo: config.project,
+        name: this.sanitizeTitle(label.title),
+        description: label.title,
+        color: this.generateColor(),
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      });
+    });
+  }
+
   public async getWorkItemsByProject(projectName: string) {
     console.log("GitHub: getWorkItemsByProject");
   }
