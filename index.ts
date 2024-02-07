@@ -216,7 +216,24 @@ class GitHub implements IOrchestrator {
   }
 
   public async createWorkItem(item: WorkItem, parentId: string = "") {
-    
+    let observability_milestone = (await this.octokit.request('GET /repos/{owner}/{repo}/milestones', {
+      owner: config.organization,
+      repo: config.project,
+      headers: {
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    })).data.find((milestone) => milestone.title === item.title);
+
+    if (!observability_milestone) {
+      observability_milestone = (await this.octokit.request('POST /repos/{owner}/{repo}/milestones', {
+        owner: config.organization,
+        repo: config.project,
+        title: this.sanitizeTitle(item.title),
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      })).data;
+    }
   }
 }
 
