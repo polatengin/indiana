@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { env, exit } from "process";
 
 import { Command } from "commander";
@@ -17,6 +17,7 @@ program
   .option('--organization <string>', 'Name of the Organization')
   .option('--project <string>', 'Name of the Project')
   .option('--file <string>', 'Json file containing the work items to be created.')
+  .option('--output <string>', 'Output file for the markdown content.')
   .parse(process.argv);
 
 const config = {
@@ -25,30 +26,40 @@ const config = {
     orchestrator: env.INDIANA_ORCHESTRATOR ?? "",
     organization: env.INDIANA_ORGANIZATION ?? "",
     project: env.INDIANA_PROJECT ?? "",
-    file: env.INDIANA_FILE ?? ""
+    file: env.INDIANA_FILE ?? "",
+    output: env.INDIANA_OUTPUT ?? "",
   },
   ...program.opts()
 };
 
-if (!config.token) {
-  console.log("No token provided.");
-  exit(1);
-}
 if (!config.orchestrator) {
   console.log("No orchestrator provided.");
-  exit(1);
-}
-if (!config.organization) {
-  console.log("No organization provided.");
-  exit(1);
-}
-if (!config.project) {
-  console.log("No project provided.");
   exit(1);
 }
 if (!config.file) {
   console.log("No file provided.");
   exit(1);
+}
+
+if (config.orchestrator === 'markdown') {
+  if (!config.output) {
+    console.log("No output file provided for markdown orchestrator.");
+    exit(1);
+  }
+} else {
+  // For other orchestrators
+  if (!config.token) {
+    console.log("No token provided.");
+    exit(1);
+  }
+  if (!config.organization) {
+    console.log("No organization provided.");
+    exit(1);
+  }
+  if (!config.project) {
+    console.log("No project provided.");
+    exit(1);
+  }
 }
 
 type WorkItem = {title: string, description: string, type: string, acceptanceCriteria: string, children: WorkItem[]};
@@ -287,6 +298,77 @@ class GitHub implements IOrchestrator {
   }
 }
 
+class MarkdownOrchestrator implements IOrchestrator {
+  private markdownContent: string = "";
+  private tocContent: string = "";
+
+  public async getWorkItemsByProject(projectName: string): Promise<void> {
+    // Placeholder implementation
+  }
+
+  private generateMarkdownForItem(item: WorkItem, level: number = 0): string {
+    let headerPrefix = "";
+    if (level === 0) headerPrefix = "Epic: ";
+    else if (level === 1) headerPrefix = "Feature: ";
+    else if (level === 2) headerPrefix = "User Story: ";
+
+    let markdown = `${"#".repeat(level + 1)} ${headerPrefix}${item.title}\n\n${item.description}\n\n`;
+
+    if (item.acceptanceCriteria && item.acceptanceCriteria.length > 0) {
+      markdown += `**Acceptance Criteria:**\n\n${item.acceptanceCriteria}\n\n`;
+    }
+
+    if (item.children && item.children.length > 0) {
+      item.children.forEach(child => {
+        markdown += this.generateMarkdownForItem(child, level + 1);
+      });
+    }
+
+    return markdown;
+  }
+
+  private addToTOC(item: WorkItem, level: number = 0): void {
+    if (level === 1) { // Include only level 1 items (Features) in the ToC
+      const anchor = item.title.toLowerCase().replace(/ /g, "-").replace(/[^\w-]/g, '');
+      this.tocContent += `- [Feature: ${item.title}](#${anchor})\n`;
+    }
+
+    if (item.children && item.children.length > 0) {
+      item.children.forEach(child => {
+        this.addToTOC(child, level + 1);
+      });
+    }
+  }
+
+  public async createWorkItem(item: WorkItem, parentId: string = ""): Promise<void> {
+    this.addToTOC(item);
+    this.markdownContent += this.generateMarkdownForItem(item);
+  }
+
+  public writeToFile(filename: string): void {
+    let fileContent = "";
+    try {
+      fileContent = readFileSync(filename, { encoding: "utf8" });
+    } catch (error) {
+      console.error("Error reading file:", error);
+      return;
+    }
+
+    const tocSection = `<!-- toc -->\n${this.tocContent}\n<!-- endtoc -->`;
+    const workItemsSection = `<!-- workitems -->\n${this.markdownContent}\n<!-- endworkitems -->`;
+
+    fileContent = fileContent.replace(/<!-- toc -->[\s\S]*?<!-- endtoc -->/, tocSection);
+    fileContent = fileContent.replace(/<!-- workitems -->[\s\S]*?<!-- endworkitems -->/, workItemsSection);
+
+    try {
+      writeFileSync(filename, fileContent, { encoding: "utf8" });
+    } catch (error) {
+      console.error("Error writing file:", error);
+    }
+  }
+}
+
+
 const jsonContent = readFileSync(config.file, "utf8");
 
 const items: WorkItem[] = JSON.parse(jsonContent);
@@ -299,8 +381,28 @@ items.forEach(item => {
   });
 });
 
-const orchestrator: IOrchestrator = config.orchestrator === "azdo" ? new AzDo() : new GitHub();
+let orchestrator: IOrchestrator;
+
+switch (config.orchestrator) {
+  case "azdo":
+    orchestrator = new AzDo();
+    break;
+  case "github":
+    orchestrator = new GitHub();
+    break;
+  case "markdown":
+    orchestrator = new MarkdownOrchestrator();
+    break;
+  default:
+    throw new Error("Invalid orchestrator type");
+}
+
 
 for (const item of items) {
   orchestrator.createWorkItem(item).then(() => {});
+}
+
+// If MarkdownOrchestrator was used, write to a markdown file
+if (orchestrator instanceof MarkdownOrchestrator) {
+  orchestrator.writeToFile(config.output);
 }
